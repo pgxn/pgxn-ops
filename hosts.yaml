@@ -1,0 +1,26 @@
+all:
+  children:
+    main:
+      hosts:
+        pgxn.org:
+          ansible_user: pgxn
+    manager:
+      hosts:
+        pgxn.org:
+          ansible_user: pgxn_manager
+    master:
+      hosts:
+        pgxn.org:
+          ansible_user: pgxn_manager
+    rsync:
+      hosts:
+        pgxn.org:
+          ansible_user: pgxn_rsync
+    api:
+      hosts:
+        pgxn.org:
+          ansible_user: pgxn_api
+    site:
+      hosts:
+        pgxn.org:
+          ansible_user: pgxn_site
