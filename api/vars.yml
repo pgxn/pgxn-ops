@@ -1,0 +1,6 @@
+---
+name: pgxn-api
+version: v0.16.5
+module: PGXN::API
+release_dir: /home/pgxn/pgxn
+deploy_dir: /var/virtuals/pgxn

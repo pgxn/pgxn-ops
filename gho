@@ -1,0 +1,47 @@
+#!/usr/bin/perl -w
+
+use strict;
+use warnings;
+use v5.10;
+use utf8;
+
+my %apps = (
+    api => {
+        build => {
+            run => sub {
+                run(qw( ansible-playbook -i hosts.yaml api/build.yml )),
+            },
+        },
+    },
+    manager => {
+        build => {
+            run => sub {
+                run(qw(
+                    ansible-playbook -i hosts.yaml manager/build.yml -e @manager/secrets.enc --ask-vault-pass
+                ))
+            },
+        },
+    },
+);
+
+sub run {
+    system(@_) == 0 or exit $? >> 8;
+}
+
+sub usage {
+    say STDERR @_ if @_;
+    say "Usage: gho ACTION APP";
+}
+
+sub bail {
+    usage(@_);
+    exit 1;
+}
+
+my ($cmd_name, $app_name) = @ARGV;
+bail() unless $cmd_name && $app_name;
+
+my $app = $apps{$app_name} or bail("Unknown app “$app_name”");
+my $cmd = $app->{$cmd_name} or bail("Unknown $app_name command “$cmd_name”");
+
+$cmd->{run}();

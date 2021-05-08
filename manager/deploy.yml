@@ -2,33 +2,38 @@
 
 - name: Build and Deploy PGXN Manager
   hosts: main
-  vars:
-    app: manager
-    version: v0.20.0
-    package: PGXN-Manager-{{ version }}
-    deploy_to: ~/deploy_to
-    # checksum: sha512:5bdea5414713c9ba39e226f062701fa14998b1a798c9750f956a0f59b5edabb8d83af9ec9f81cf9f47fa92c21b560c9b2be1b543d0bd8f1b49579b69101d3a8f
-    work_dir: ~/work
   tasks:
+    - name: Load variables
+      include_vars:
+        file: manager/vars.yml
+        name: app
     - name: Create Work Directory
       file:
-        path: "{{ work_dir }}"
+        path: "{{ app.work_dir }}"
         state: directory
-    - name: Download {{ package }}
+    - name: Download {{ app.package }}
       get_url:
-        url: https://github.com/pgxn/pgxn-manager/releases/download/{{ version }}/{{ package }}.tar.gz
-        dest: "{{ work_dir }}"
-        # checksum: "{{checksum}}"
+        url: https://github.com/pgxn/pgxn-manager/releases/download/{{ app.version }}/{{ app.package }}.tar.gz
+        dest: "{{ app.work_dir }}"
+        # checksum: "{{ app.checksum }}"
     - name: Unpack Tarball
       command:
-        chdir: "{{ work_dir }}"
-        cmd: tar zxf {{ package }}.tar.gz
-        creates: "{{ package }}"
+        chdir: "{{ app.work_dir }}"
+        cmd: tar zxf {{ app.package }}.tar.gz
+        creates: "{{ app.package }}"
         warn: false # unarchive cannot find a handler for .tar.gz
-    - name: Build {{ package }}
+    - name: Build {{ app.package }}
       command:
-        chdir: "{{ work_dir }}/{{ package }}"
-        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app }} .
-    - name: Install {{ package }}
+        chdir: "{{ app.work_dir }}/{{ app.package }}"
+        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.app }} .
+    - name: Install {{ app.package }}
       command:
-        cmd: mv "{{ work_dir }}/{{ package }}/{{ app }}" ~
+        cmd: mv {{ app.work_dir }}/{{ app.package }} {{ app.release_dir }}
+    - name: Configure {{ app.package }}
+      template:
+        # Password stored in 1Password with name PGXN Manager Secrets
+        src: manager/prod.json.j2
+        dest: "{{ app.work_dir }}/{{ app.package }}"/conf/prod.json
+        owner: pgxn
+        group: pgxn
+        mode: "u=rw,g=r,o="
