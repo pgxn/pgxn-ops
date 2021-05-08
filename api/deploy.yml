@@ -26,11 +26,19 @@
     - name: Install {{ package }}
       command:
         cmd: mv {{ work_dir }}/{{ package }} {{ release_dir }}
+    - name: Configure {{ package }}
+      template:
+        # Password stored in 1Password with name PGXN Manager Secrets
+        src: manager/prod.json.j2
+        dest: "{{ work_dir }}/{{ package }}"/conf/prod.json
+        owner: pgxn
+        group: pgxn
+        mode: "u=rw,g=r,o="
     - name: Release {{ package }}
       file:
         state: link
         src: "{{ work_dir }}/{{ package }}"
-        dest: "{{ release_dir }}/app"
+        dest: "{{ release_dir }}/{{ app }}"
         force: yes
     - name: Create Deploy Directory
       file:
