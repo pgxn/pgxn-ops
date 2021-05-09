@@ -6,13 +6,12 @@
     - name: Include Variables
       include_vars: file=vars.yml name=app
     - name: Create Directories
-      file: path="{{ item }}" state=directory mode=u=rwx,g=rwx,o=
+      file: path="{{ item.dir }}" state=directory mode={{ item.mode }}
       loop:
-        - "{{ app.release_dir }}"
-        - "{{ app.release_dir }}/api-root"
-        - "{{ app.release_dir }}/logs"
-        - "{{ app.release_dir }}/pids"
-        - "{{ app.deploy_dir }}"
+        - { dir: "{{ app.release_dir }}",          mode: "u=rwx,g=rx,o=rx"  }
+        - { dir: "{{ app.release_dir }}/logs",     mode: "u=rwx,g=rwx,o=" }
+        - { dir: "{{ app.release_dir }}/pids",     mode: "u=rwx,g=rwx,o=" }
+        - { dir: "{{ app.release_dir }}/api-root", mode: "u=rwx,g=rx,o=rx" }
     - name: Build {{ app.name }}-{{ app.version }}
       command:
         chdir: "{{ app.release_dir }}"
