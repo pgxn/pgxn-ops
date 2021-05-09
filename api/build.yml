@@ -1,13 +1,10 @@
 ---
-
 - name: Build PGXN API
   hosts: main
   tags: [build]
   tasks:
-    - name: Load variables
-      include_vars:
-        file: vars.yml
-        name: app
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
     - name: Create Directories
       file: path="{{ item }}" state=directory
       loop:
@@ -15,6 +12,7 @@
         - "{{ app.release_dir }}/api-root"
         - "{{ app.release_dir }}/logs"
         - "{{ app.release_dir }}/pids"
+        - "{{ app.release_dir }}/bin"
         - "{{ app.deploy_dir }}"
     - name: Build {{ app.name }}-{{ app.version }}
       command:
@@ -38,12 +36,3 @@
     #     src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
     #     dest: "{{ app.deploy_dir }}/{{ app.app }}"
     #     force: yes
-
-- name: Configure PGXN API
-  hosts: main
-  tags: [deploy]
-  tasks:
-    - name: Debug
-      debug:
-        msg: "hello"
-

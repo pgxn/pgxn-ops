@@ -1,0 +1,65 @@
+#!/bin/bash
+
+PATH="/home/pgxn_api/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+PERL5LIB="{{ app.deploy_dir }}/lib/perl5"
+cd {{ app.deploy_dir }}
+
+start() {
+    if check_running; then
+        echo "pgxn_api_server is already running"
+        exit
+    fi
+    bin/pgxn_api_server \
+        -s Starman \
+        -E prod \
+        --workers {{ app.opt.workers }} \
+        --preload-app \
+        --max-requests {{ app.opt.maxreq }} \
+        --listen {{ app.opt.listen }} \
+        --daemonize \
+        --pid {{ app.opt.pid }} \
+        --error-log {{ app.opt.log }} \
+        --errors-to {{ app.opt.errors_to }} \
+        --errors-from {{ app.opt.errors_from }}
+}
+
+stop() {
+    if check_running; then
+        echo "pgxn_api_server is not running"
+        exit
+    fi
+    kill $(getpid)
+}
+
+restart() {
+    if check_running; then
+        stop
+    else
+        echo "pgxn_api_server is not running; skipping stop"
+    fi
+    start
+}
+
+getpid() {
+    `cat {{ app.opt.pid }}`
+}
+
+check_running() {
+    [ -s {{ app.opt.pid }} && kill -0 $(getpid) >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+exit $?

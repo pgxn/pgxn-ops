@@ -1,0 +1,57 @@
+---
+- name: Deploy PGXN API
+  hosts: main
+  tags: [deploy]
+  tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
+    - name: Setup PGXN Cron Environment
+      cronvar:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - { name: MAILTO, value: "{{ app.errors_to }}" }
+        - { name: SHELL,  value: /bin/bash }
+    - name: Install api_ctl
+      template:
+        src: api/api_ctl.j2
+        dest: "{{ app.release_dir }}/bin/api_ctl"
+        owner: pgxn
+        group: pgxn
+        mode: "u=rwx,g=rx,o="
+    - name: Deploy PGXN Cron Job
+      cron:
+        name: Sync Doc Root
+        minute: "*/5"
+        job: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/pgxn_api_sync {{ app.master_dir }}"
+    - name: Deploy {{ app.name }}-{{ app.version }}
+      file:
+        state: link
+        src: "{{ item.src }}"
+        dest: "{{ item.dst }}"
+        force: yes
+      loop:
+        - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
+          dst: "{{ app.release_dir }}/{{ app.name }}"
+        - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
+          dst: "{{ app.deploy_dir }}"
+
+- name: Restart PGXN
+  hosts: api
+  tags: [deploy]
+  tasks:
+    - name: Setup API Cron Environment
+      cronvar:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+      loop:
+        - { name: MAILTO, value: "{{ app.errors_to }}" }
+        - { name: SHELL,  value: /bin/bash }
+    - name: Deploy API Cron Job
+      cron:
+        name: Run PGXN API
+        special_time: reboot
+        job: "{{ app.deploy_dir }}/api_ctl start"
+    - name: Restart PGXN API
+      command:
+        cmd: "{{ app.deploy_dir }}/api_ctl restart"
