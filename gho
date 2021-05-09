@@ -32,7 +32,23 @@ my %apps = (
             },
         },
     },
-);
+    site => {
+        build => {
+            run => sub {
+                run(qw( ansible-playbook -i hosts.yaml site/build.yml )),
+            },
+        },
+        deploy => {
+            run => sub {
+                run(qw( ansible-playbook -i hosts.yaml site/deploy.yml )),
+            },
+        },
+        restart => {
+            run => sub {
+                run(qw( ansible-playbook -i hosts.yaml site/restart.yml )),
+            },
+        },
+    },);
 
 sub run {
     system(@_) == 0 or exit $? >> 8;

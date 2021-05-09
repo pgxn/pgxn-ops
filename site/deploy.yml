@@ -1,0 +1,48 @@
+---
+- name: Deploy PGXN Site
+  hosts: main
+  tags: [deploy]
+  tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
+    - name: Install Control Script
+      template:
+        src: "site_ctl.j2"
+        dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/site_ctl"
+        owner: pgxn
+        group: pgxn
+        mode: "u=rwx,g=rx,o="
+    - name: Deploy {{ app.name }}-{{ app.version }}
+      file:
+        state: link
+        src: "{{ item.src }}"
+        dest: "{{ item.dst }}"
+        force: yes
+      loop:
+        - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
+          dst: "{{ app.release_dir }}/{{ app.name }}"
+        - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
+          dst: "{{ app.deploy_dir }}"
+
+- name: Restart PGXN
+  hosts: site
+  tags: [deploy]
+  tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
+    - name: Setup Site Cron Environment
+      cronvar: name=MAILTO value={{ app.opt.errors_to }}
+    - name: Link from {{ app.home_dir }}
+      file:
+        state: link
+        src: "{{ app.deploy_dir }}"
+        dest: "{{ app.home_dir }}/{{ app.name }}"
+        force: yes
+    - name: Deploy Site Cron Job
+      cron:
+        name: Run PGXN Site
+        special_time: reboot
+        job: "{{ app.deploy_dir }}/bin/site_ctl start"
+    - name: Restart PGXN Site
+      command:
+        cmd: "{{ app.deploy_dir }}/bin/site_ctl restart"

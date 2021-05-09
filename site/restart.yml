@@ -1,0 +1,9 @@
+---
+- name: Restart PGXN Site
+  hosts: site
+  tags: [service]
+  tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
+    - command:
+        cmd: "{{ app.deploy_dir }}/bin/site_ctl restart"
