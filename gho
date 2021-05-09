@@ -12,6 +12,11 @@ my %apps = (
                 run(qw( ansible-playbook -i hosts.yaml api/build.yml )),
             },
         },
+        deploy => {
+            run => sub {
+                run(qw( ansible-playbook -i hosts.yaml api/deploy.yml )),
+            },
+        },
     },
     manager => {
         build => {

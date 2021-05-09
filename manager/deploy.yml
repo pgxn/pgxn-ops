@@ -32,7 +32,7 @@
     - name: Configure {{ app.package }}
       template:
         # Password stored in 1Password with name PGXN Manager Secrets
-        src: manager/prod.json.j2
+        src: prod.json.j2
         dest: "{{ app.work_dir }}/{{ app.package }}"/conf/prod.json
         owner: pgxn
         group: pgxn

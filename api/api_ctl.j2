@@ -1,7 +1,10 @@
 #!/bin/bash
 
+set -e
+
 PATH="/home/pgxn_api/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 PERL5LIB="{{ app.deploy_dir }}/lib/perl5"
+
 cd {{ app.deploy_dir }}
 
 start() {
@@ -29,6 +32,7 @@ stop() {
         exit
     fi
     kill $(getpid)
+    rm {{ app.opt.pid }}
 }
 
 restart() {
@@ -41,11 +45,11 @@ restart() {
 }
 
 getpid() {
-    `cat {{ app.opt.pid }}`
+    echo $(cat {{ app.opt.pid }})
 }
 
 check_running() {
-    [ -s {{ app.opt.pid }} && kill -0 $(getpid) >/dev/null 2>&1
+    [ -s {{ app.opt.pid }} ] && kill -0 $(getpid) >/dev/null 2>&1
 }
 
 case "$1" in

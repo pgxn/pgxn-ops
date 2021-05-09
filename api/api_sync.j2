@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+PATH="/home/pgxn_api/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+PERL5LIB="{{ app.deploy_dir }}/lib/perl5"
+cd {{ app.deploy_dir }}
+
+bin/pgxn_api_sync {{ app.master_dir }}
