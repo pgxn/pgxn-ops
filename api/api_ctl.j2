@@ -27,14 +27,9 @@ start() {
         --errors-from {{ app.opt.errors_from }}
 }
 
-_stop() {
-    kill $(getpid)
-    rm {{ app.opt.pid }}
-}
-
 stop() {
     if check_running; then
-        _stop
+        kill $(getpid)
         return
     fi
     echo "pgxn_api_server is not running"
@@ -42,7 +37,7 @@ stop() {
 
 restart() {
     if check_running; then
-        _stop
+        kill $(getpid)
     else
         echo "pgxn_api_server is not running; skipping stop"
     fi

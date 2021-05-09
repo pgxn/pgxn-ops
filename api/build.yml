@@ -12,7 +12,6 @@
         - "{{ app.release_dir }}/api-root"
         - "{{ app.release_dir }}/logs"
         - "{{ app.release_dir }}/pids"
-        - "{{ app.release_dir }}/bin"
         - "{{ app.deploy_dir }}"
     - name: Build {{ app.name }}-{{ app.version }}
       command:
@@ -22,10 +21,10 @@
     - name: Link {{ app.name }}-{{ app.version }}
       file:
         state: link
-        src: "{{ item.src }}"
+        src: "{{ app.release_dir }}/{{ item.src }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/{{ item.dst }}"
         force: yes
       loop:
-        - { src: "{{ app.release_dir }}/logs", dst: logs }
-        - { src: "{{ app.release_dir }}/pids", dst: pids }
-        - { src: "{{ app.release_dir }}/api-root", dst: www }
+        - { src: "logs", dst: logs }
+        - { src: "pids", dst: pids }
+        - { src: "api-root", dst: www }

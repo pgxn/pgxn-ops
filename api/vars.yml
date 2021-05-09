@@ -5,6 +5,7 @@ module: PGXN::API
 release_dir: /home/pgxn/pgxn
 deploy_dir: /var/virtuals/pgxn/api.pgxn.org
 master_dir: /var/virtuals/pgxn/master.pgxn.org
+home_dir: /home/pgxn_api
 
 opt:
   workers: 5

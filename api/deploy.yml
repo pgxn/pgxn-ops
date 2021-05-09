@@ -8,7 +8,7 @@
     - name: Install Control Scripts
       template:
         src: "{{ item }}.j2"
-        dest: "{{ app.release_dir }}/bin/{{ item }}"
+        dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/{{ item }}"
         owner: pgxn
         group: pgxn
         mode: "u=rwx,g=rx,o="
@@ -19,7 +19,7 @@
       cron:
         name: Doc root sync job
         minute: "*/5"
-        job: "{{ app.release_dir }}/bin/api_sync"
+        job: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/api_sync"
     - name: Deploy {{ app.name }}-{{ app.version }}
       file:
         state: link
@@ -29,8 +29,6 @@
       loop:
         - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
           dst: "{{ app.release_dir }}/{{ app.name }}"
-        - src: "{{ app.release_dir }}/bin/api_ctl"
-          dst: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/api_ctl"
         - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
           dst: "{{ app.deploy_dir }}"
 
@@ -42,6 +40,12 @@
       include_vars: file=vars.yml name=app
     - name: Setup API Cron Environment
       cronvar: name=MAILTO value={{ app.opt.errors_to }}
+    - name: Link from {{ app.home_dir }}
+      file:
+        state: link
+        src: "{{ app.deploy_dir }}"
+        dest: "{{ app.home_dir }}/{{ app.name }}"
+        force: yes
     - name: Deploy API Cron Job
       cron:
         name: Run PGXN API
