@@ -41,6 +41,7 @@ sub run {
 sub usage {
     say STDERR @_ if @_;
     say "Usage: gho ACTION APP";
+    say "Run gho --help for a complete list of actions and apps."
 }
 
 sub bail {
