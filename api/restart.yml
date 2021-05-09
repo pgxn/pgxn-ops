@@ -1,0 +1,7 @@
+---
+- name: Restart PGXN API
+  hosts: api
+  tags: [service]
+  tasks:
+    - command:
+        cmd: "{{ app.deploy_dir }}/bin/api_ctl restart"

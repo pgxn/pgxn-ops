@@ -17,6 +17,11 @@ my %apps = (
                 run(qw( ansible-playbook -i hosts.yaml api/deploy.yml )),
             },
         },
+        restart => {
+            run => sub {
+                run(qw( ansible-playbook -i hosts.yaml api/restart.yml )),
+            },
+        },
     },
     manager => {
         build => {
@@ -43,7 +48,19 @@ sub bail {
     exit 1;
 }
 
+sub help {
+    usage();
+    say "\nActions & Commands";
+    for my $cmd (sort map { keys %{ $_ } } values %apps) {
+        say "*   $cmd";
+        say "    -   $_" for grep { $apps{$_}->{$cmd} } sort keys %apps;
+    }
+    exit;
+}
+
 my ($cmd_name, $app_name) = @ARGV;
+help() if $cmd_name && $cmd_name =~ /^-{0,2}help$/;
+
 bail() unless $cmd_name && $app_name;
 
 my $app = $apps{$app_name} or bail("Unknown app “$app_name”");
