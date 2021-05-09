@@ -3,14 +3,14 @@
 set -e
 
 PATH="/home/pgxn_api/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-PERL5LIB="{{ app.deploy_dir }}/lib/perl5"
+export PERL5LIB="{{ app.deploy_dir }}/lib/perl5"
 
 cd {{ app.deploy_dir }}
 
 start() {
     if check_running; then
         echo "pgxn_api_server is already running"
-        exit
+        return
     fi
     bin/pgxn_api_server \
         -s Starman \
@@ -21,23 +21,28 @@ start() {
         --listen {{ app.opt.listen }} \
         --daemonize \
         --pid {{ app.opt.pid }} \
+        --doc-root {{ app.deploy_dir }}/www \
         --error-log {{ app.opt.log }} \
         --errors-to {{ app.opt.errors_to }} \
         --errors-from {{ app.opt.errors_from }}
 }
 
-stop() {
-    if check_running; then
-        echo "pgxn_api_server is not running"
-        exit
-    fi
+_stop() {
     kill $(getpid)
     rm {{ app.opt.pid }}
 }
 
+stop() {
+    if check_running; then
+        _stop
+        return
+    fi
+    echo "pgxn_api_server is not running"
+}
+
 restart() {
     if check_running; then
-        stop
+        _stop
     else
         echo "pgxn_api_server is not running; skipping stop"
     fi

@@ -11,6 +11,6 @@ opt:
   maxreq: 100
   listen: 127.0.0.1:7497
   pid: pids/pgxn_api.pid
-  log: log/pgxn_api.log
+  log: logs/pgxn_api.log
   errors_to: pgxn-admins@googlegroups.com
   errors_from: pgxn@pgxn.org

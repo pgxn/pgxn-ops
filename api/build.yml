@@ -6,7 +6,7 @@
     - name: Include Variables
       include_vars: file=vars.yml name=app
     - name: Create Directories
-      file: path="{{ item }}" state=directory
+      file: path="{{ item }}" state=directory mode=u=rwx,g=rwx,o=
       loop:
         - "{{ app.release_dir }}"
         - "{{ app.release_dir }}/api-root"

@@ -14,15 +14,10 @@
         mode: "u=rwx,g=rx,o="
       loop: [api_ctl, api_sync]
     - name: Setup PGXN Cron Environment
-      cronvar:
-        name: "{{ item.name }}"
-        value: "{{ item.value }}"
-      loop:
-        - { name: MAILTO, value: "{{ app.opt.errors_to }}" }
-        - { name: SHELL,  value: /bin/bash }
+      cronvar: name=MAILTO value={{ app.opt.errors_to }}
     - name: Deploy PGXN Cron Job
       cron:
-        name: Sync Doc Root
+        name: Doc root sync job
         minute: "*/5"
         job: "{{ app.release_dir }}/bin/api_sync"
     - name: Deploy {{ app.name }}-{{ app.version }}
@@ -34,6 +29,8 @@
       loop:
         - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
           dst: "{{ app.release_dir }}/{{ app.name }}"
+        - src: "{{ app.release_dir }}/bin/api_ctl"
+          dst: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/api_ctl"
         - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
           dst: "{{ app.deploy_dir }}"
 
@@ -41,13 +38,10 @@
   hosts: api
   tags: [deploy]
   tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
     - name: Setup API Cron Environment
-      cronvar:
-        name: "{{ item.name }}"
-        value: "{{ item.value }}"
-      loop:
-        - { name: MAILTO, value: "{{ app.errors_to }}" }
-        - { name: SHELL,  value: /bin/bash }
+      cronvar: name=MAILTO value={{ app.opt.errors_to }}
     - name: Deploy API Cron Job
       cron:
         name: Run PGXN API
