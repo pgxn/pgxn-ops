@@ -1,7 +1,9 @@
 ---
-app: pgxn-manager
+name: pgxn-manager
 version: v0.16.5
 module: PGXN::Manager
+dist_name: PGXN-Manager
 work_dir: /home/pgxn/work
-release_dir: /home/pgxn/releases
-deploy_dir: /var/virtuals/pgxn
+release_dir: /home/pgxn/pgxn
+deploy_dir: /var/virtuals/pgxn/manager.pgxn.org
+master_dir: /var/virtuals/pgxn/master.pgxn.org

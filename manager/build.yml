@@ -1,0 +1,50 @@
+---
+
+- name: Build PGXN Manager
+  hosts: main
+  tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
+    - name: Create Directories
+      file: path="{{ item.dir }}" state=directory mode={{ item.mode }}
+      loop:
+        - { dir: "{{ app.release_dir }}",          mode: "u=rwx,g=rx,o=rx"  }
+        - { dir: "{{ app.release_dir }}/logs",     mode: "u=rwx,g=rwx,o=" }
+        - { dir: "{{ app.release_dir }}/pids",     mode: "u=rwx,g=rwx,o=" }
+        - { dir: "{{ app.work_dir }}",             mode: "u=rwx,g=rx,o=rx" }
+    - name: Download { app.dist_name }}-{{ app.version }}
+      get_url:
+        url: https://github.com/pgxn/pgxn-manager/releases/download/{{ app.version }}/{ app.dist_name }}-{{ app.version }}.tar.gz
+        dest: "{{ app.work_dir }}"
+        # checksum: "{{ app.checksum }}"
+    - name: Unpack Tarball
+      command:
+        chdir: "{{ app.work_dir }}"
+        cmd: tar zxf { app.dist_name }}-{{ app.version }}.tar.gz
+        creates: "{ app.dist_name }}-{{ app.version }}"
+        warn: false # unarchive cannot find a handler for .tar.gz
+    - name: Build { app.dist_name }}-{{ app.version }}
+      command:
+        chdir: "{{ app.work_dir }}/{ app.dist_name }}-{{ app.version }}"
+        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.app }} .
+    - name: Install { app.dist_name }}-{{ app.version }}
+      command:
+        cmd: mv {{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }} {{ app.release_dir }}
+    - name: Configure { app.dist_name }}-{{ app.version }}
+      template:
+        # Password stored in 1Password with name PGXN Manager Secrets
+        src: prod.json.j2
+        dest: "{{ app.work_dir }}/{ app.dist_name }}-{{ app.version }}"/conf/prod.json
+        owner: pgxn
+        group: pgxn
+        mode: "u=rw,g=r,o="
+    - name: Link {{ app.dist_name }}-{{ app.version }}
+      file:
+        state: link
+        src: "{{ app.release_dir }}/{{ item.src }}"
+        dest: "{{ app.release_dir }}/{{ app.dist_name }}-{{ app.version }}/{{ item.dst }}"
+        force: yes
+      loop:
+        - { src: "logs", dst: logs }
+        - { src: "pids", dst: pids }
+        - { src: "api-root", dst: www }

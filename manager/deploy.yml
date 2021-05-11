@@ -3,37 +3,5 @@
 - name: Build and Deploy PGXN Manager
   hosts: main
   tasks:
-    - name: Load variables
-      include_vars:
-        file: manager/vars.yml
-        name: app
-    - name: Create Work Directory
-      file:
-        path: "{{ app.work_dir }}"
-        state: directory
-    - name: Download {{ app.package }}
-      get_url:
-        url: https://github.com/pgxn/pgxn-manager/releases/download/{{ app.version }}/{{ app.package }}.tar.gz
-        dest: "{{ app.work_dir }}"
-        # checksum: "{{ app.checksum }}"
-    - name: Unpack Tarball
-      command:
-        chdir: "{{ app.work_dir }}"
-        cmd: tar zxf {{ app.package }}.tar.gz
-        creates: "{{ app.package }}"
-        warn: false # unarchive cannot find a handler for .tar.gz
-    - name: Build {{ app.package }}
-      command:
-        chdir: "{{ app.work_dir }}/{{ app.package }}"
-        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.app }} .
-    - name: Install {{ app.package }}
-      command:
-        cmd: mv {{ app.work_dir }}/{{ app.package }} {{ app.release_dir }}
-    - name: Configure {{ app.package }}
-      template:
-        # Password stored in 1Password with name PGXN Manager Secrets
-        src: prod.json.j2
-        dest: "{{ app.work_dir }}/{{ app.package }}"/conf/prod.json
-        owner: pgxn
-        group: pgxn
-        mode: "u=rw,g=r,o="
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
