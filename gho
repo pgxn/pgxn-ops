@@ -27,7 +27,7 @@ my %apps = (
         build => {
             run => sub {
                 run(qw(
-                    ansible-playbook -i hosts.yaml manager/build.yml -e @manager/secrets.enc --ask-vault-pass
+                    ansible-playbook -i hosts.yaml manager/build.yml -e @manager/secrets.yml --ask-vault-pass
                 ))
             },
         },
