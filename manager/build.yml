@@ -16,7 +16,7 @@
       get_url:
         url: https://github.com/pgxn/pgxn-manager/releases/download/{{ app.version }}/{{ app.dist_name }}-{{ app.version }}.tar.gz
         dest: "{{ app.work_dir }}"
-        # checksum: "{{ app.checksum }}"
+        checksum: "{{ app.checksum }}"
     - name: Unpack Tarball
       command:
         chdir: "{{ app.work_dir }}"
@@ -26,25 +26,14 @@
     - name: Build {{ app.dist_name }}-{{ app.version }}
       command:
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
-        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.app }} .
-    - name: Install {{ app.dist_name }}-{{ app.version }}
-      command:
-        cmd: mv {{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }} {{ app.release_dir }}
-    - name: Configure {{ app.dist_name }}-{{ app.version }}
-      template:
-        # Password stored in 1Password with name PGXN Manager Secrets
-        src: prod.json.j2
-        dest: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/conf/prod.json"
-        owner: pgxn
-        group: pgxn
-        mode: "u=rw,g=r,o="
-    - name: Link {{ app.dist_name }}-{{ app.version }}
+        creates: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
+        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.release_dir }}/{{ app.name }}-{{ app.version }} . Cookie::Baker::XS WWW::Form::UrlEncoded::XS
+    - name: Link {{ app.name }}-{{ app.version }}
       file:
         state: link
         src: "{{ app.release_dir }}/{{ item.src }}"
-        dest: "{{ app.release_dir }}/{{ app.dist_name }}-{{ app.version }}/{{ item.dst }}"
+        dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/{{ item.dst }}"
         force: yes
       loop:
         - { src: "logs", dst: logs }
         - { src: "pids", dst: pids }
-        - { src: "api-root", dst: www }

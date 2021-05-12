@@ -5,3 +5,11 @@
   tasks:
     - name: Include Variables
       include_vars: file=vars.yml name=app
+    - name: Configure {{ app.dist_name }}-{{ app.version }}
+      template:
+        # Password stored in 1Password with name PGXN Manager Secrets
+        src: prod.json.j2
+        dest: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/conf/prod.json"
+        owner: pgxn
+        group: pgxn
+        mode: "u=rw,g=r,o="
