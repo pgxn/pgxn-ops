@@ -2,14 +2,60 @@
 
 - name: Build and Deploy PGXN Manager
   hosts: main
+  tags: [deploy]
   tasks:
     - name: Include Variables
       include_vars: file=vars.yml name=app
+    - name: Install Control Scripts
+      template:
+        src: "{{ item }}.j2"
+        dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/{{ item }}"
+        owner: pgxn
+        group: pgxn
+        mode: "u=rwx,g=rx,o="
+      loop: [mgr_ctl, mgr_mirrors]
     - name: Configure {{ app.dist_name }}-{{ app.version }}
       template:
-        # Password stored in 1Password with name PGXN Manager Secrets
+        # Password stored in 1Password as “PGXN Manager Secrets”
         src: prod.json.j2
         dest: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/conf/prod.json"
         owner: pgxn
         group: pgxn
         mode: "u=rw,g=r,o="
+    - name: Deploy {{ app.name }}-{{ app.version }}
+      file:
+        state: link
+        src: "{{ item.src }}"
+        dest: "{{ item.dst }}"
+        force: yes
+      loop:
+        - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
+          dst: "{{ app.release_dir }}/{{ app.name }}"
+        - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
+          dst: "{{ app.deploy_dir }}"
+
+- name: Restart PGXN Manager
+  hosts: manager
+  tags: [deploy]
+  tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
+    - name: Setup Manager Cron Environment
+      cronvar: name=MAILTO value={{ app.opt.errors_to }}
+    - name: Link from {{ app.home_dir }}
+      file:
+        state: link
+        src: "{{ app.deploy_dir }}"
+        dest: "{{ app.home_dir }}/{{ app.name }}"
+        force: yes
+    - name: Deploy Manager Cron Jobs
+      cron:
+        name: Run {{ item.name }}
+        special_time: "{{ item.time }}"
+        job: "{{ item.job }}"
+      loop:
+        -  { name: "PGXN Manager", time: "reboot", job: "{{ app.deploy_dir }}/bin/mgr_ctl start" }
+        -  { name: "PGXN Mirror Checker", time: "daily", job: "{{ app.deploy_dir }}/bin/mgr_mirrors" }
+    - name: Restart PGXN Manager
+      command:
+        cmd: "{{ app.deploy_dir }}/bin/mgr_ctl restart"

@@ -33,9 +33,15 @@ my %apps = (
         },
         deploy => {
             run => sub {
+                # Password stored in 1Password as “PGXN Manager Secrets”
                 run(qw(
                     ansible-playbook -i hosts.yaml manager/deploy.yml -e @manager/secrets.yml --ask-vault-pass
                 ))
+            },
+        },
+        restart => {
+            run => sub {
+                run(qw( ansible-playbook -i hosts.yaml api/restart.yml )),
             },
         },
     },

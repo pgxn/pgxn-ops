@@ -32,7 +32,7 @@
         - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
           dst: "{{ app.deploy_dir }}"
 
-- name: Restart PGXN
+- name: Restart PGXN API
   hosts: api
   tags: [deploy]
   tasks:

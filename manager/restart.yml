@@ -1,0 +1,9 @@
+---
+- name: Restart PGXN Manager
+  hosts: manager
+  tags: [service]
+  tasks:
+    - name: Include Variables
+      include_vars: file=vars.yml name=app
+    - command:
+        cmd: "{{ app.deploy_dir }}/bin/mgr_ctl restart"

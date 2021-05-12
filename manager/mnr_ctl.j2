@@ -1,0 +1,70 @@
+#!/bin/bash
+
+set -e
+
+PATH="/home/pgxn_manager/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+export PERL5LIB="{{ app.deploy_dir }}/lib/perl5"
+export TMPDIR=$HOME/tmp
+
+cd {{ app.deploy_dir }}
+
+start() {
+    if check_running; then
+        echo "pgxn_manager_server is already running"
+        return
+    fi
+    starman  --listen 127.0.0.1:7496 --daemonize --pid pids/pgxn_mana\
+ger.pid --error-log log/pgxn_manager.log bin/pgxn_manager.psgi
+
+    starman \
+        -E prod \
+        --workers {{ app.opt.workers }} \
+        --preload-app \
+        --max-requests {{ app.opt.maxreq }} \
+        --listen {{ app.opt.listen }} \
+        --daemonize \
+        --pid {{ app.opt.pid }} \
+        --error-log {{ app.opt.log }} \
+        bin/pgxn_manager.psgi
+}
+
+stop() {
+    if check_running; then
+        kill $(getpid)
+        return
+    fi
+    echo "pgxn_api_server is not running"
+}
+
+restart() {
+    if check_running; then
+        kill $(getpid)
+    else
+        echo "pgxn_api_server is not running; skipping stop"
+    fi
+    start
+}
+
+getpid() {
+    echo $(cat {{ app.opt.pid }})
+}
+
+check_running() {
+    [ -s {{ app.opt.pid }} ] && kill -0 $(getpid) >/dev/null 2>&1
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+exit $?

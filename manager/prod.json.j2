@@ -11,11 +11,10 @@
         ["StackTrace", "no_print_errors", 1],
         ["ReverseProxy"]
     ],
-    "mirror_root": "/var/virtuals/pgxn/master.pgxn.org",
-    "mirror_uri": "https://master.pgxn.org",
-    "admin_email": "PGXN Admins <pgxn@pgexperts.com>",
-    "alert_email": "PGXN Admins <pgxn-admins@googlegroups.com>",
-    "auth_uri": "https://manager.pgxn.org/",
+    "mirror_root": "{{ app.mirror_dir }}",
+    "mirror_uri": "{{ app.mirror_uri }}",
+    "admin_email": "{{ app.admin_email }}",
+    "alert_email": "{{ app.alert_email }}",
     "uri_script_name_key": "HTTP_X_FORWARDED_SCRIPT_NAME",
     "uri_templates": {
         "download":  "/dist/{dist}/{version}/{dist}-{version}.zip",
