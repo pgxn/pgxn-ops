@@ -9,7 +9,7 @@
     - name: Create Directories
       file: path="{{ item.dir }}" state=directory mode={{ item.mode }}
       loop:
-        - { dir: "{{ app.release_dir }}",      mode: "u=rwx,g=rx,o=rx"  }
+        - { dir: "{{ app.release_dir }}",      mode: "u=rwx,g=rx,o=rx" }
         - { dir: "{{ app.release_dir }}/logs", mode: "u=rwx,g=rwx,o=" }
         - { dir: "{{ app.release_dir }}/pids", mode: "u=rwx,g=rwx,o=" }
         - { dir: "{{ app.work_dir }}",         mode: "u=rwx,g=rx,o=rx" }
@@ -29,6 +29,26 @@
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
         creates: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
         cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.release_dir }}/{{ app.name }}-{{ app.version }} . Cookie::Baker::XS WWW::Form::UrlEncoded::XS
+    - name: Configure {{ app.dist_name }}-{{ app.version }}
+      template:
+        # Password stored in 1Password as “PGXN Manager Secrets”
+        src: prod.json.j2
+        dest: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/conf/prod.json"
+        owner: pgxn
+        group: pgxn
+        mode: "u=rw,g=r,o="
+    - name: Update the PGXN Database
+      command:
+        chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
+        cmd: "{{ item }}"
+      loop:
+        - perl Build.PL --db_super_user {{ db.superuser }} --context prod
+        - ./Build db
+    - name: Create the config directory
+      file:
+        path: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/conf"
+        state: directory
+        mode: "u=rwx,g=rx,o=rx"
     - name: Link {{ app.name }}-{{ app.version }}
       file:
         state: link

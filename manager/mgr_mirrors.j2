@@ -5,4 +5,4 @@ set -e
 PATH="/home/pgxn_manager/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 export PERL5LIB="{{ app.deploy_dir }}/lib/perl5"
 cd {{ app.deploy_dir }}
-bin/check_mirrors --days {{ app.lag_days }} --hours {{ app.lag_hours }} {{ app.mirror_dir }}/index.json
+bin/check_mirrors --days {{ app.opt.lag_days }} --hours {{ app.opt.lag_hours }} {{ app.mirror_dir }}/index.json

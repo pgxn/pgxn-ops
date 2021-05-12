@@ -13,9 +13,6 @@ start() {
         echo "pgxn_manager_server is already running"
         return
     fi
-    starman  --listen 127.0.0.1:7496 --daemonize --pid pids/pgxn_mana\
-ger.pid --error-log log/pgxn_manager.log bin/pgxn_manager.psgi
-
     starman \
         -E prod \
         --workers {{ app.opt.workers }} \
@@ -33,14 +30,14 @@ stop() {
         kill $(getpid)
         return
     fi
-    echo "pgxn_api_server is not running"
+    echo "pgxn_manager_server is not running"
 }
 
 restart() {
     if check_running; then
         kill $(getpid)
     else
-        echo "pgxn_api_server is not running; skipping stop"
+        echo "pgxn_manager_server is not running; skipping stop"
     fi
     start
 }
