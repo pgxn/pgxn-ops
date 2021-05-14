@@ -36,6 +36,7 @@ stop() {
 restart() {
     if check_running; then
         kill $(getpid)
+        sleep 2
     else
         echo "pgxn_manager_server is not running; skipping stop"
     fi
