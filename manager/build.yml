@@ -29,6 +29,12 @@
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
         creates: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
         cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.release_dir }}/{{ app.name }}-{{ app.version }} . Cookie::Baker::XS WWW::Form::UrlEncoded::XS
+    - name: Copy the www directory
+      copy:
+        remote_src: yes
+        src: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/www"
+        dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/"
+        mode: "u=rwx,g=rx,o=rx"
     - name: Configure {{ app.dist_name }}-{{ app.version }}
       template:
         # Password stored in 1Password as “PGXN Manager Secrets”
