@@ -1,9 +1,9 @@
 ---
 name: pgxn-manager
-version: v0.21.0
+version: v0.22.0
 module: PGXN::Manager
 dist_name: PGXN-Manager
-checksum: sha512:918a1316e4ecfe4744e151d66aef6038dcac622fa60574f159043d18cedc448a8d76d684b49fcdd89e1453f9296a96cb4ae31607b7c4967ec9cf1842c8cf90a3
+checksum: sha512:59fde03e28bf446841528247784a4a9128024ed7d879811681d00211540a65a629842f70de90b7422650bdfc56ae31014c585dae103391777955b02e1f6722bb
 work_dir: /home/pgxn/work
 release_dir: /home/pgxn/pgxn
 home_dir: /home/pgxn_manager
