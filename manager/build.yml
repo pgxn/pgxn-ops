@@ -1,5 +1,4 @@
 ---
-
 - name: Build PGXN Manager
   hosts: main
   tags: [build]
