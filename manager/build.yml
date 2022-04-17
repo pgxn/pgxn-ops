@@ -28,10 +28,11 @@
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
         creates: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
         cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.release_dir }}/{{ app.name }}-{{ app.version }} . Cookie::Baker::XS WWW::Form::UrlEncoded::XS
-    - name: Copy the www directory
+    - name: Copy the Asset Directories
+      loop: [ www, doc ]
       copy:
         remote_src: yes
-        src: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/www"
+        src: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/{{ item }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/"
         mode: "u=rwx,g=rx,o=rx"
     - name: Configure {{ app.dist_name }}-{{ app.version }}
