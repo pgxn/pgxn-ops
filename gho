@@ -27,7 +27,7 @@ my %apps = (
         edit => {
             run => sub {
                 # Password stored in 1Password as “PGXN Manager Secrets”
-                run(qw(ansible-vault edit  manager/secrets.yml))
+                run(qw(ansible-vault edit manager/secrets.yml))
             }
         }
     },
@@ -91,7 +91,8 @@ sub bail {
 sub help {
     usage();
     say "\nActions & Commands";
-    for my $cmd (sort map { keys %{ $_ } } values %apps) {
+    my %seen;
+    for my $cmd (grep { !$seen{$_}++ } sort map { keys %{ $_ } } values %apps) {
         say "*   $cmd";
         say "    -   $_" for grep { $apps{$_}->{$cmd} } sort keys %apps;
     }
