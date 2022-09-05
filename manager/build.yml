@@ -48,7 +48,8 @@
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
         cmd: "{{ item }}"
       loop:
-        - perl Build.PL --db_super_user {{ db.superuser }} --context prod
+        - cpanm --notest --local-lib local Module::Build::DB
+        - perl -I local/lib/perl5 Build.PL --db_super_user {{ db.superuser }} --context prod
         - ./Build db
     - name: Create the config directory
       file:
