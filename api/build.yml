@@ -15,7 +15,7 @@
     - name: Build {{ app.name }}-{{ app.version }}
       command:
         chdir: "{{ app.release_dir }}"
-        creates: "{{ app.name }}-{{ app.version }}"
+        # creates: "{{ app.name }}-{{ app.version }}"
         cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.name }}-{{ app.version }} {{ app.module }}@{{ app.version }} Cookie::Baker::XS WWW::Form::UrlEncoded::XS
     - name: Link {{ app.name }}-{{ app.version }}
       file:
