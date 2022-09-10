@@ -56,6 +56,6 @@ required for the [Twitter account] to Tweet releases.
   [www]: https://pgxn.org "PGXN: PostgreSQL Extension Network"
   [PGXN Manager]: https://manager.pgxn.org
     "Distribute PostgreSQL Extensions on PGXN"
-  [PGXN API] https://api.pgxn.org/index.json
+  [PGXN API]: https://api.pgxn.org/index.json
   [Twitter account]: https://twitter.com/pgxn "@pgxn on Twitter"
 
