@@ -10,8 +10,8 @@ PGXN Ops
 This project contains [Ansible] playbooks for building deploying, and otherwise
 managing the [PGXN][www] apps:
 
-*   [PGXN Manager]: [playbooks](manager)
-*   [PGXN API]: [playbooks](api)
+*   [PGXN Manager][]: [playbooks](manager)
+*   [PGXN API][]: [playbooks](api)
 *   [PGXN Site][www]: [playbooks](site)
 
 Operations
