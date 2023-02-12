@@ -22,7 +22,7 @@
         chdir: "{{ app.work_dir }}"
         cmd: tar zxf {{ app.dist_name }}-{{ app.version }}.tar.gz
         # creates: "{{ app.dist_name }}-{{ app.version }}"
-        warn: false # unarchive cannot find a handler for .tar.gz
+        # warn: false # unarchive cannot find a handler for .tar.gz
     - name: Build {{ app.dist_name }}-{{ app.version }}
       command:
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"

@@ -1,9 +1,9 @@
 ---
 name: pgxn-manager
-version: v0.22.0
+version: v0.30.0
 module: PGXN::Manager
 dist_name: PGXN-Manager
-checksum: sha512:59fde03e28bf446841528247784a4a9128024ed7d879811681d00211540a65a629842f70de90b7422650bdfc56ae31014c585dae103391777955b02e1f6722bb
+checksum: sha512:59f4f00c345f9b3b0e461407296591c34c6e8fd774c68dc9a83a80d0a04c04ce820ef9353bcf0f8e2d98e1ac06d34f8976b763b02d6da540203a2df308b23d68
 work_dir: /home/pgxn/work
 release_dir: /home/pgxn/pgxn
 home_dir: /home/pgxn_manager
@@ -17,9 +17,12 @@ opt:
   workers: 5
   maxreq: 100
   listen: 127.0.0.1:7496
-  pid: pids/pgxn_manager.pid
-  log: logs/pgxn_manager.log
+  mgr_pid: pids/pgxn_manager.pid
+  mgr_log: logs/pgxn_manager.log
   errors_to: pgxn-admins@googlegroups.com
   errors_from: pgxn@pgxn.org
   lag_hours: 2
   lag_days: 2
+  cmr_pid: pids/pgxn_consumer.pid
+  cmr_log: logs/pgxn_consumer.log
+  interval: 5

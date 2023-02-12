@@ -9,46 +9,67 @@ export TMPDIR=$HOME/tmp
 cd {{ app.deploy_dir }}
 
 start() {
-    if check_running; then
-        echo "pgxn_manager_server is already running"
-        return
+    if check_running {{ app.opt.mgr_pid }}; then
+        echo "pgxn_manager is already running"
+    else
+        starman \
+            -E prod \
+            --workers {{ app.opt.workers }} \
+            --preload-app \
+            --max-requests {{ app.opt.maxreq }} \
+            --listen {{ app.opt.listen }} \
+            --daemonize \
+            --pid {{ app.opt.mgr_pid }} \
+            --error-log {{ app.opt.mgr_log }} \
+            bin/pgxn_manager.psgi
     fi
-    starman \
-        -E prod \
-        --workers {{ app.opt.workers }} \
-        --preload-app \
-        --max-requests {{ app.opt.maxreq }} \
-        --listen {{ app.opt.listen }} \
-        --daemonize \
-        --pid {{ app.opt.pid }} \
-        --error-log {{ app.opt.log }} \
-        bin/pgxn_manager.psgi
+    if check_running {{ app.opt.cmr_pid }}; then
+        echo "pgxn_consumer is already running"
+    else
+        env PGPORT=5433 bin/pgxn_consumer \
+            -E prod \
+            --interval {{ app.opt.interval }} \
+            --daemonize \
+            --verbose --verbose \
+            --pid {{ app.opt.cmr_pid }} \
+            --log-file {{ app.opt.cmr_log }}
+    fi
 }
 
 stop() {
-    if check_running; then
-        kill $(getpid)
-        return
+    if check_running {{ app.opt.mgr_pid }}; then
+        kill $(getpid {{ app.opt.mgr_pid }})
+    else
+        echo "pgxn_manager is not running"
     fi
-    echo "pgxn_manager_server is not running"
+    if check_running {{ app.opt.cmr_pid }}; then
+        kill $(getpid {{ app.opt.cmr_pid }})
+    else
+        echo "pgxn_consumer is not running"
+    fi
 }
 
 restart() {
-    if check_running; then
-        kill $(getpid)
-        sleep 2
+    if check_running {{ app.opt.mgr_pid }}; then
+        kill $(getpid {{ app.opt.mgr_pid }})
     else
-        echo "pgxn_manager_server is not running; skipping stop"
+        echo "pgxn_manager is not running; skipping stop"
     fi
+    if check_running {{ app.opt.cmr_pid }}; then
+        kill $(getpid {{ app.opt.cmr_pid }})
+    else
+        echo "pgxn_consumer is not running; skipping stop"
+    fi
+    sleep 5
     start
 }
 
 getpid() {
-    echo $(cat {{ app.opt.pid }})
+    echo $(cat $1)
 }
 
 check_running() {
-    [ -s {{ app.opt.pid }} ] && kill -0 $(getpid) >/dev/null 2>&1
+    [ -s $1 ] && kill -0 $(getpid $1) >/dev/null 2>&1
 }
 
 case "$1" in
