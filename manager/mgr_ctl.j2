@@ -9,6 +9,18 @@ export TMPDIR=$HOME/tmp
 cd {{ app.deploy_dir }}
 
 start() {
+    # Start pgxn_consumer first.
+    if check_running {{ app.opt.cmr_pid }}; then
+        echo "pgxn_consumer is already running"
+    else
+        env PGPORT=5433 bin/pgxn_consumer \
+            -E prod \
+            --interval {{ app.opt.interval }} \
+            --daemonize \
+            --verbose --verbose \
+            --pid {{ app.opt.cmr_pid }} \
+            --log-file {{ app.opt.cmr_log }}
+    fi
     if check_running {{ app.opt.mgr_pid }}; then
         echo "pgxn_manager is already running"
     else
@@ -23,20 +35,10 @@ start() {
             --error-log {{ app.opt.mgr_log }} \
             bin/pgxn_manager.psgi
     fi
-    if check_running {{ app.opt.cmr_pid }}; then
-        echo "pgxn_consumer is already running"
-    else
-        env PGPORT=5433 bin/pgxn_consumer \
-            -E prod \
-            --interval {{ app.opt.interval }} \
-            --daemonize \
-            --verbose --verbose \
-            --pid {{ app.opt.cmr_pid }} \
-            --log-file {{ app.opt.cmr_log }}
-    fi
 }
 
 stop() {
+    # Stop pgxn_manager first.
     if check_running {{ app.opt.mgr_pid }}; then
         kill $(getpid {{ app.opt.mgr_pid }})
     else
@@ -50,6 +52,7 @@ stop() {
 }
 
 restart() {
+    # Stop pgxn_manager first.
     if check_running {{ app.opt.mgr_pid }}; then
         kill $(getpid {{ app.opt.mgr_pid }})
     else
@@ -60,7 +63,7 @@ restart() {
     else
         echo "pgxn_consumer is not running; skipping stop"
     fi
-    sleep 5
+    sleep 2
     start
 }
 
