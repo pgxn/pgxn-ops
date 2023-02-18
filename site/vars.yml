@@ -1,6 +1,6 @@
 ---
 name: pgxn-site
-version: v0.22.1
+version: v0.22.2
 module: PGXN::Site
 release_dir: /home/pgxn/pgxn
 deploy_dir: /var/virtuals/pgxn/site.pgxn.org
