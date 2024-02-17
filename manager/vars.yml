@@ -1,16 +1,16 @@
 ---
 name: pgxn-manager
-version: v0.31.1
+version: v0.32.0
 module: PGXN::Manager
 dist_name: PGXN-Manager
-checksum: sha512:c24281a126bba46f56eb393aaf0b51db20725cafd60b3b85e88c91cd2540c0e24db90a9279bdbb764c22f83e0e8957107566a688466bbed6306711705520cb8b
+checksum: sha512:edf936ee0ecb08cfa66220b874d0379b35cfad26ec5e364a908415b327f75ae9d3e03296d19da4f9890b367fc93c5c8e474b3aa08cb9c2605dc546e750475dce
 work_dir: /home/pgxn/work
 release_dir: /home/pgxn/pgxn
 home_dir: /home/pgxn_manager
 deploy_dir: /var/virtuals/pgxn/manager.pgxn.org
 mirror_dir: /var/virtuals/pgxn/master.pgxn.org
 mirror_uri: https://master.pgxn.org
-admin_email: PGXN Admins <pgxn@pgexperts.com>
+admin_email: PGXN Admins <pgxn-admins@googlegroups.com>
 alert_email: PGXN Admins <pgxn-admins@googlegroups.com>
 
 opt:
