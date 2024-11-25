@@ -50,12 +50,11 @@ Secrets
 One additional [`gho`](./gho) action, `./gho edit secrets`, edits the secrets
 file. This file is protected by a password; contact @theory for details. The
 contents of the file include database connection information and secrets
-required for the [Twitter account] to Tweet releases.
+required for the [Mastodon account] to post releases.
 
   [Ansible]: https://www.ansible.com "Ansible is Simple IT Automation"
   [www]: https://pgxn.org "PGXN: PostgreSQL Extension Network"
   [PGXN Manager]: https://manager.pgxn.org
     "Distribute PostgreSQL Extensions on PGXN"
   [PGXN API]: https://api.pgxn.org/index.json
-  [Twitter account]: https://twitter.com/pgxn "@pgxn on Twitter"
-
+  [Mastodon account]: https://botsin.space/@pgxn "@pgxn@botsin.space"
