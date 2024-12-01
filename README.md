@@ -57,4 +57,4 @@ required for the [Mastodon account] to post releases.
   [PGXN Manager]: https://manager.pgxn.org
     "Distribute PostgreSQL Extensions on PGXN"
   [PGXN API]: https://api.pgxn.org/index.json
-  [Mastodon account]: https://botsin.space/@pgxn "@pgxn@botsin.space"
+  [Mastodon account]: https://mastodon.social/@pgxn "@pgxn@mastodon.social"
