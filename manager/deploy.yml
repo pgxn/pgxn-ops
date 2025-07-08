@@ -4,27 +4,27 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: vars.yml
         name: app
     - name: Install Control Scripts
-      template:
+      ansible.builtin.template:
         src: "{{ item }}.j2"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/{{ item }}"
         owner: pgxn
         group: pgxn
         mode: "u=rwx,g=rx,o="
       loop: [mgr_ctl, mgr_mirrors]
-    - name: Configure {{ app.dist_name }}-{{ app.version }}
-      template:
+    - name: Configure {{ [app.dist_name, app.version] | join('-') }}
+      ansible.builtin.template:
         # Password stored in 1Password as “PGXN Manager Secrets”
         src: prod.json.j2
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/conf/prod.json"
         owner: pgxn
         group: pgxn
         mode: "u=rw,g=r,o="
-    - name: Deploy {{ app.name }}-{{ app.version }}
-      file:
+    - name: Deploy {{ [app.name, app.version] | join('-') }}
+      ansible.builtin.file:
         state: link
         src: "{{ item.src }}"
         dest: "{{ item.dst }}"
@@ -40,38 +40,39 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: vars.yml
         name: app
     - name: Link from {{ app.home_dir }}
-      file:
+      ansible.builtin.file:
         state: link
         src: "{{ app.deploy_dir }}"
         dest: "{{ app.home_dir }}/{{ app.name }}"
         force: true
     - name: Setup Cron Environment
-      cronvar:
+      ansible.builtin.cron:
+        env: true
         name: MAILTO
         value: "{{ app.opt.errors_to }}"
     - name: Deploy Mirror Sync Cron Job
-      cron:
+      ansible.builtin.cron:
         name: Run PGXN Mirror Checker
         special_time: daily
         job: "{{ app.deploy_dir }}/bin/mgr_mirrors"
     - name: Create Service Directory
-      file:
+      ansible.builtin.file:
         path: "{{ app.home_dir }}/.config/systemd/user"
         state: directory
         mode: "u=rwx,go=rx"
     - name: Deploy Service Files
       loop: [manager, consumer]
-      template:
+      ansible.builtin.template:
         src: "{{ item }}.service"
         dest: "{{ app.home_dir }}/.config/systemd/user/{{ item }}.pgxn.org.service"
         mode: "u=rw,g=r,o="
     - name: Enable Linger for {{ ansible_user }}
       changed_when: false
-      command:
+      ansible.builtin.command:
         argv: [loginctl, enable-linger, "{{ ansible_user }}"]
     - name: Restart Manager
       loop: [manager, consumer]

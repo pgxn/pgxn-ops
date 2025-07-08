@@ -4,11 +4,11 @@
   tags: [build]
   tasks:
     - name: Include Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: vars.yml
         name: app
     - name: Create Directories
-      file:
+      ansible.builtin.file:
         path: "{{ item.dir }}"
         state: directory
         mode: "{{ item.mode }}"
@@ -21,8 +21,8 @@
           mode: "u=rwx,g=rwx,o="
         - dir: "{{ app.release_dir }}/api-root"
           mode: "u=rwx,go=rx"
-    - name: Build {{ app.name }}-{{ app.version }}
-      command:
+    - name: Build {{ [app.name, app.version] | join('-') }}
+      ansible.builtin.command:
         chdir: "{{ app.release_dir }}"
         creates: "{{ app.name }}-{{ app.version }}"
         cmd: >
@@ -32,8 +32,8 @@
           --local-lib-contained {{ app.name }}-{{ app.version }}
           {{ app.module }}@{{ app.version }}
           Cookie::Baker::XS WWW::Form::UrlEncoded::XS
-    - name: Link {{ app.name }}-{{ app.version }}
-      file:
+    - name: Link {{ [app.name, app.version] | join('-') }}
+      ansible.builtin.file:
         state: link
         src: "{{ app.release_dir }}/{{ item.src }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/{{ item.dst }}"

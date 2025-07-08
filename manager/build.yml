@@ -4,11 +4,11 @@
   tags: [build]
   tasks:
     - name: Include Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: vars.yml
         name: app
     - name: Create Directories
-      file:
+      ansible.builtin.file:
         path: "{{ item.dir }}"
         state: directory
         mode: "{{ item.mode }}"
@@ -28,8 +28,8 @@
         dest: "{{ app.work_dir }}"
         mode: u+rw
         remote_src: true
-    - name: Build {{ app.dist_name }}-{{ app.version }}
-      command:
+    - name: Build {{ [app.dist_name, app.version] | join('-') }}
+      ansible.builtin.command:
         creates: Build
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
         # creates: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
@@ -43,13 +43,13 @@
           WWW::Form::UrlEncoded::XS
     - name: Copy the Asset Directories
       loop: [www, doc]
-      copy:
+      ansible.builtin.copy:
         remote_src: true
         src: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/{{ item }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/"
         mode: "u=rwx,g=rx,o=rx"
-    - name: Configure {{ app.dist_name }}-{{ app.version }}
-      template:
+    - name: Configure {{ [app.dist_name, app.version] | join('-') }}
+      ansible.builtin.template:
         # Password stored in 1Password as “PGXN Manager Secrets”
         src: prod.json.j2
         dest: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/conf/prod.json"
@@ -59,7 +59,7 @@
     - name: Update the PGXN Database
       register: result
       changed_when: result.rc == 0
-      shell:
+      ansible.builtin.shell:
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
         cmd: |
           set -e
@@ -67,12 +67,12 @@
           perl -I local/lib/perl5 Build.PL --db_super_user {{ db.superuser }} --context prod
           ./Build db
     - name: Create the config directory
-      file:
+      ansible.builtin.file:
         path: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/conf"
         state: directory
         mode: "u=rwx,g=rx,o=rx"
-    - name: Link {{ app.name }}-{{ app.version }}
-      file:
+    - name: Link {{ [app.name, app.version] | join('-') }}
+      ansible.builtin.file:
         state: link
         src: "{{ app.release_dir }}/{{ item.src }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/{{ item.dst }}"

@@ -1,0 +1,28 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+        name: Lint trailing whitespace
+        exclude_types: [image]
+      - id: end-of-file-fixer
+        name: Lint end-of-file newline
+        exclude_types: [image]
+      - id: check-added-large-files
+        name: Don't permit large files
+        exclude_types: [image]
+
+  - repo: https://github.com/ansible/ansible-lint.git
+    rev: v25.6.1
+    hooks:
+      - id: ansible-lint
+        name: Lint Ansible Playbooks
+        args: [-p]
+        files: ^[^/]+/[^.]+.yml
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        name: JSON and YAML formatting
+        types_or: [json, yaml]

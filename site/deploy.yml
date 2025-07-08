@@ -4,18 +4,18 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: vars.yml
         name: app
     - name: Install Control Script
-      template:
+      ansible.builtin.template:
         src: "site_ctl.j2"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/site_ctl"
         owner: pgxn
         group: pgxn
         mode: "u=rwx,g=rx,o="
-    - name: Deploy {{ app.name }}-{{ app.version }}
-      file:
+    - name: Deploy {{ [app.name, app.version] | join('-') }}
+      ansible.builtin.file:
         state: link
         src: "{{ item.src }}"
         dest: "{{ item.dst }}"
@@ -31,28 +31,28 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars:
+      ansible.builtin.include_vars:
         file: vars.yml
         name: app
     - name: Link from {{ app.home_dir }}
-      file:
+      ansible.builtin.file:
         state: link
         src: "{{ app.deploy_dir }}"
         dest: "{{ app.home_dir }}/{{ app.name }}"
         force: true
     - name: Create Service Directory
-      file:
+      ansible.builtin.file:
         path: "{{ app.home_dir }}/.config/systemd/user"
         state: directory
         mode: "u=rwx,go=rx"
     - name: Deploy Service File
-      template:
+      ansible.builtin.template:
         mode: "u=rw,g=r,o="
         src: site.service
         dest: ~/.config/systemd/user/site.pgxn.org.service
     - name: Enable Linger for {{ ansible_user }}
       changed_when: false
-      command:
+      ansible.builtin.command:
         argv: [loginctl, enable-linger, "{{ ansible_user }}"]
     - name: Restart Site
       ansible.builtin.systemd_service:

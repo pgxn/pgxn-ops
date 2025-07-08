@@ -1,0 +1,14 @@
+name: 🧪 CI
+on:
+  push:
+    branches: ["*"]
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run gho
+        run: ./gho --help
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1

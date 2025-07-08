@@ -18,5 +18,4 @@ opt:
   base_url: https://pgxn.org/
   api_url: https://api.pgxn.org/
   private_api_url: file:/var/virtuals/pgxn/api.pgxn.org/www/
-
-# add_header Content-Security-Policy "default-src 'self'; img-src *; script-src 'sha256-GN1zhliF5ZZMDFdFdgbLI+BAIxikH+5wEBDQEdf4Ryk='" always;
+  # add_header Content-Security-Policy "default-src 'self'; img-src *; script-src 'sha256-GN1zhliF5ZZMDFdFdgbLI+BAIxikH+5wEBDQEdf4Ryk='" always;
