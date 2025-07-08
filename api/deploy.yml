@@ -29,7 +29,7 @@
         state: link
         src: "{{ item.src }}"
         dest: "{{ item.dst }}"
-        force: yes
+        force: true
       loop:
         - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
           dst: "{{ app.release_dir }}/{{ app.name }}"
@@ -49,17 +49,17 @@
         state: link
         src: "{{ app.deploy_dir }}"
         dest: "{{ app.home_dir }}/{{ app.name }}"
-        force: yes
+        force: true
     - name: Create Service Directory
       file:
         path: "{{ app.home_dir }}/.config/systemd/user"
         state: directory
-        mode: "0755"
+        mode: "u=rwx,go=rx"
     - name: Deploy Service File
       template:
         src: api.service
         dest: "{{ app.home_dir }}/.config/systemd/user/api.pgxn.org.service"
-        mode: "0644"
+        mode: "u=rw,g=r,o="
     - name: Enable Linger for {{ ansible_user }}
       changed_when: false
       command:

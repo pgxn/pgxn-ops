@@ -22,5 +22,3 @@ ExecStart=pgxn_consumer \
 
 [Install]
 WantedBy=default.target
-
-# vim: set filetype=systemd:

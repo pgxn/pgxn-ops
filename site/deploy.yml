@@ -44,10 +44,10 @@
       file:
         path: "{{ app.home_dir }}/.config/systemd/user"
         state: directory
-        mode: "0755"
+        mode: "u=rwx,go=rx"
     - name: Deploy Service File
       template:
-        mode: "0644"
+        mode: "u=rw,g=r,o="
         src: site.service
         dest: ~/.config/systemd/user/site.pgxn.org.service
     - name: Enable Linger for {{ ansible_user }}

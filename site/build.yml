@@ -4,24 +4,39 @@
   tags: [build]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Create Directories
-      file: path="{{ item.dir }}" state=directory mode={{ item.mode }}
+      file:
+        path: "{{ item.dir }}"
+        state: directory
+        mode: "{{ item.mode }}"
       loop:
-        - { dir: "{{ app.release_dir }}",      mode: "u=rwx,g=rx,o=rx"  }
-        - { dir: "{{ app.release_dir }}/logs", mode: "u=rwx,g=rwx,o=" }
-        - { dir: "{{ app.release_dir }}/pids", mode: "u=rwx,g=rwx,o=" }
+        - dir: "{{ app.release_dir }}"
+          mode: "u=rwx,g=rx,o=rx"
+        - dir: "{{ app.release_dir }}/logs"
+          mode: "u=rwx,g=rwx,o="
+        - dir: "{{ app.release_dir }}/pids"
+          mode: "u=rwx,g=rwx,o="
     - name: Build {{ app.name }}-{{ app.version }}
       command:
         chdir: "{{ app.release_dir }}"
-        # creates: "{{ app.name }}-{{ app.version }}"
-        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.name }}-{{ app.version }} {{ app.module }}@{{ app.version }} Cookie::Baker::XS WWW::Form::UrlEncoded::XS PGXN::API::Searcher
+        creates: "{{ app.name }}-{{ app.version }}"
+        cmd: >
+          cpanm
+          --with-recommends
+          --notest
+          --local-lib-contained {{ app.name }}-{{ app.version }}
+          {{ app.module }}@{{ app.version }}
+          Cookie::Baker::XS
+          WWW::Form::UrlEncoded::XS PGXN::API::Searcher
     - name: Link {{ app.name }}-{{ app.version }}
       file:
         state: link
         src: "{{ app.release_dir }}/{{ item.src }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/{{ item.dst }}"
-        force: yes
+        force: true
       loop:
         - { src: "logs", dst: logs }
         - { src: "pids", dst: pids }

@@ -4,34 +4,47 @@
   tags: [build]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Create Directories
-      file: path="{{ item.dir }}" state=directory mode={{ item.mode }}
+      file:
+        path: "{{ item.dir }}"
+        state: directory
+        mode: "{{ item.mode }}"
       loop:
-        - { dir: "{{ app.release_dir }}",      mode: "u=rwx,g=rx,o=rx" }
-        - { dir: "{{ app.release_dir }}/logs", mode: "u=rwx,g=rwx,o=" }
-        - { dir: "{{ app.release_dir }}/pids", mode: "u=rwx,g=rwx,o=" }
-        - { dir: "{{ app.work_dir }}",         mode: "u=rwx,g=rx,o=rx" }
-    - name: Download {{ app.dist_name }}-{{ app.version }}
-      get_url:
-        url: https://github.com/pgxn/pgxn-manager/releases/download/{{ app.version }}/{{ app.dist_name }}-{{ app.version }}.tar.gz
+        - dir: "{{ app.release_dir }}"
+          mode: "u=rwx,g=rx,o=rx"
+        - dir: "{{ app.release_dir }}/logs"
+          mode: "u=rwx,g=rwx,o="
+        - dir: "{{ app.release_dir }}/pids"
+          mode: "u=rwx,g=rwx,o="
+        - dir: "{{ app.work_dir }}"
+          mode: "u=rwx,g=rx,o=rx"
+    - name: Download and Unpack
+      # creates: "{{ app.dist_name }}-{{ app.version }}"
+      ansible.builtin.unarchive:
+        src: https://github.com/pgxn/pgxn-manager/releases/download/{{ app.version }}/{{ app.dist_name }}-{{ app.version }}.tar.gz
         dest: "{{ app.work_dir }}"
-        checksum: "{{ app.checksum }}"
-    - name: Unpack Tarball
-      command:
-        chdir: "{{ app.work_dir }}"
-        cmd: tar zxf {{ app.dist_name }}-{{ app.version }}.tar.gz
-        # creates: "{{ app.dist_name }}-{{ app.version }}"
-        # warn: false # unarchive cannot find a handler for .tar.gz
+        mode: u+rw
+        remote_src: true
     - name: Build {{ app.dist_name }}-{{ app.version }}
       command:
+        creates: Build
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
         # creates: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
-        cmd: cpanm --with-recommends --notest --local-lib-contained {{ app.release_dir }}/{{ app.name }}-{{ app.version }} . Cookie::Baker::XS WWW::Form::UrlEncoded::XS
+        cmd: >
+          cpanm
+          --with-recommends
+          --notest
+          --local-lib-contained {{ app.release_dir }}/{{ app.name }}-{{ app.version }}
+          .
+          Cookie::Baker::XS
+          WWW::Form::UrlEncoded::XS
     - name: Copy the Asset Directories
-      loop: [ www, doc ]
+      loop: [www, doc]
       copy:
-        remote_src: yes
+        remote_src: true
         src: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}/{{ item }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/"
         mode: "u=rwx,g=rx,o=rx"
@@ -44,13 +57,15 @@
         group: pgxn
         mode: "u=rw,g=r,o="
     - name: Update the PGXN Database
-      command:
+      register: result
+      changed_when: result.rc == 0
+      shell:
         chdir: "{{ app.work_dir }}/{{ app.dist_name }}-{{ app.version }}"
-        cmd: "{{ item }}"
-      loop:
-        - cpanm --notest --local-lib local Module::Build::DB
-        - perl -I local/lib/perl5 Build.PL --db_super_user {{ db.superuser }} --context prod
-        - ./Build db
+        cmd: |
+          set -e
+          cpanm --notest --local-lib local Module::Build::DB
+          perl -I local/lib/perl5 Build.PL --db_super_user {{ db.superuser }} --context prod
+          ./Build db
     - name: Create the config directory
       file:
         path: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/conf"
@@ -61,7 +76,7 @@
         state: link
         src: "{{ app.release_dir }}/{{ item.src }}"
         dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/{{ item.dst }}"
-        force: yes
+        force: true
       loop:
         - { src: "logs", dst: logs }
         - { src: "pids", dst: pids }
