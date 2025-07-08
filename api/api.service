@@ -1,0 +1,28 @@
+# Troubleshooting:
+# systemctl --user status api.pgxn.org.service
+# journalctl --user -f -u api.pgxn.org.service
+[Unit]
+Description=api.pgxn.org webservice
+After=network.target
+
+[Service]
+Type=simple
+RestartSec=5
+Restart=always
+WorkingDirectory={{ app.deploy_dir }}
+ExecSearchPath={{ app.deploy_dir }}/bin
+Environment="PERL5LIB=lib/perl5"
+ExecStart=pgxn_api_server \
+    -s Starman \
+    -E prod \
+    --workers {{ app.opt.workers }} \
+    --preload-app \
+    --max-requests {{ app.opt.maxreq }} \
+    --listen {{ app.opt.listen }} \
+    --doc-root {{ app.deploy_dir }}/www \
+    --error-log {{ app.opt.log }} \
+    --errors-to {{ app.opt.errors_to }} \
+    --errors-from {{ app.opt.errors_from }}
+
+[Install]
+WantedBy=default.target

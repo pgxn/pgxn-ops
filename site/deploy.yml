@@ -4,7 +4,9 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Install Control Script
       template:
         src: "site_ctl.j2"
@@ -17,7 +19,7 @@
         state: link
         src: "{{ item.src }}"
         dest: "{{ item.dst }}"
-        force: yes
+        force: true
       loop:
         - src: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}"
           dst: "{{ app.release_dir }}/{{ app.name }}"
@@ -29,20 +31,33 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
-    - name: Setup Site Cron Environment
-      cronvar: name=MAILTO value={{ app.opt.errors_to }}
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Link from {{ app.home_dir }}
       file:
         state: link
         src: "{{ app.deploy_dir }}"
         dest: "{{ app.home_dir }}/{{ app.name }}"
-        force: yes
-    - name: Deploy Site Cron Job
-      cron:
-        name: Run PGXN Site
-        special_time: reboot
-        job: "{{ app.deploy_dir }}/bin/site_ctl start"
-    - name: Restart PGXN Site
+        force: true
+    - name: Create Service Directory
+      file:
+        path: "{{ app.home_dir }}/.config/systemd/user"
+        state: directory
+        mode: "0755"
+    - name: Deploy Service File
+      template:
+        mode: "0644"
+        src: site.service
+        dest: ~/.config/systemd/user/site.pgxn.org.service
+    - name: Enable Linger for {{ ansible_user }}
+      changed_when: false
       command:
-        cmd: "{{ app.deploy_dir }}/bin/site_ctl restart"
+        argv: [loginctl, enable-linger, "{{ ansible_user }}"]
+    - name: Restart Site
+      ansible.builtin.systemd_service:
+        name: site.pgxn.org
+        scope: user
+        enabled: true
+        state: restarted
+        daemon_reload: true

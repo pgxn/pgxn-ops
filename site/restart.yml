@@ -3,7 +3,10 @@
   hosts: site
   tags: [service]
   tasks:
-    - name: Include Variables
-      include_vars: file=vars.yml name=app
-    - command:
-        cmd: "{{ app.deploy_dir }}/bin/site_ctl restart"
+    - name: Restart Site
+      ansible.builtin.systemd_service:
+        name: site.pgxn.org
+        scope: user
+        state: restarted
+        enabled: true
+        daemon_reload: true

@@ -4,7 +4,9 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Install Control Scripts
       template:
         src: "{{ item }}.j2"
@@ -14,12 +16,14 @@
         mode: "u=rwx,g=rx,o="
       loop: [api_ctl, api_sync]
     - name: Setup PGXN Cron Environment
-      cronvar: name=MAILTO value={{ app.opt.errors_to }}
-    - name: Deploy PGXN Cron Job
+      cronvar:
+        name: MAILTO
+        value: "{{ app.opt.errors_to }}"
+    - name: Deploy API Sync Cron Job
       cron:
         name: Doc root sync job
         minute: "*/5"
-        job: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/api_sync"
+        job: "{{ app.deploy_dir }}/bin/api_sync"
     - name: Deploy {{ app.name }}-{{ app.version }}
       file:
         state: link
@@ -37,20 +41,33 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
-    - name: Setup API Cron Environment
-      cronvar: name=MAILTO value={{ app.opt.errors_to }}
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Link from {{ app.home_dir }}
       file:
         state: link
         src: "{{ app.deploy_dir }}"
         dest: "{{ app.home_dir }}/{{ app.name }}"
         force: yes
-    - name: Deploy API Cron Job
-      cron:
-        name: Run PGXN API
-        special_time: reboot
-        job: "{{ app.deploy_dir }}/bin/api_ctl start"
-    - name: Restart PGXN API
+    - name: Create Service Directory
+      file:
+        path: "{{ app.home_dir }}/.config/systemd/user"
+        state: directory
+        mode: "0755"
+    - name: Deploy Service File
+      template:
+        src: api.service
+        dest: "{{ app.home_dir }}/.config/systemd/user/api.pgxn.org.service"
+        mode: "0644"
+    - name: Enable Linger for {{ ansible_user }}
+      changed_when: false
       command:
-        cmd: "{{ app.deploy_dir }}/bin/api_ctl restart"
+        argv: [loginctl, enable-linger, "{{ ansible_user }}"]
+    - name: Enable & Restart
+      ansible.builtin.systemd_service:
+        name: api.pgxn.org
+        scope: user
+        enabled: true
+        state: restarted
+        daemon_reload: true

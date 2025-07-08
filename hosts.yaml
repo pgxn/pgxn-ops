@@ -4,23 +4,29 @@ all:
       hosts:
         pgxn.org:
           ansible_user: pgxn
+          ansible_python_interpreter: /usr/bin/python3
     manager:
       hosts:
         manager.pgxn.org:
           ansible_user: pgxn_manager
+          ansible_python_interpreter: /usr/bin/python3
     master:
       hosts:
         master.pgxn.org:
           ansible_user: pgxn_manager
+          ansible_python_interpreter: /usr/bin/python3
     rsync:
       hosts:
         master.pgxn.org:
           ansible_user: pgxn_rsync
+          ansible_python_interpreter: /usr/bin/python3
     api:
       hosts:
         api.pgxn.org:
           ansible_user: pgxn_api
+          ansible_python_interpreter: /usr/bin/python3
     site:
       hosts:
         www.pgxn.org:
           ansible_user: pgxn_site
+          ansible_python_interpreter: /usr/bin/python3

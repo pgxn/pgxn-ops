@@ -38,7 +38,8 @@ If the current version is already built, this action will not rebuild it.
 ### `deploy`
 
 Deploy the latest version of the app. This creates or replaces a symlink to
-the version and then restarts (or starts) the app.
+the version, installs the various configuration and service management files
+and then restarts (or starts) the app.
 
 ### `restart`
 

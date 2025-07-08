@@ -1,0 +1,26 @@
+# Troubleshooting:
+# systemctl --user status consumer.pgxn.org.service
+# journalctl --user -f -u consumer.pgxn.org.service
+[Unit]
+Description=consumer.pgxn.org service
+After=network.target
+
+[Service]
+Type=simple
+RestartSec=5
+Restart=always
+WorkingDirectory={{ app.deploy_dir }}
+ExecSearchPath={{ app.deploy_dir }}/bin
+Environment=PERL5LIB=lib/perl5
+Environment="TMPDIR=$HOME/tmp"
+Environment=PGPORT=5433
+ExecStart=pgxn_consumer \
+    -E prod \
+    --interval {{ app.opt.interval }} \
+    --verbose --verbose \
+    --log-file {{ app.opt.cmr_log }}
+
+[Install]
+WantedBy=default.target
+
+# vim: set filetype=systemd:

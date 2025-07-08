@@ -4,7 +4,9 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Install Control Scripts
       template:
         src: "{{ item }}.j2"
@@ -38,23 +40,44 @@
   tags: [deploy]
   tasks:
     - name: Include Variables
-      include_vars: file=vars.yml name=app
-    - name: Setup Manager Cron Environment
-      cronvar: name=MAILTO value={{ app.opt.errors_to }}
+      include_vars:
+        file: vars.yml
+        name: app
     - name: Link from {{ app.home_dir }}
       file:
         state: link
         src: "{{ app.deploy_dir }}"
         dest: "{{ app.home_dir }}/{{ app.name }}"
         force: yes
-    - name: Deploy Manager Cron Jobs
+    - name: Setup Cron Environment
+      cronvar:
+        name: MAILTO
+        value: "{{ app.opt.errors_to }}"
+    - name: Deploy Mirror Sync Cron Job
       cron:
-        name: Run {{ item.name }}
-        special_time: "{{ item.time }}"
-        job: "{{ item.job }}"
-      loop:
-        -  { name: "PGXN Manager", time: "reboot", job: "{{ app.deploy_dir }}/bin/mgr_ctl start" }
-        -  { name: "PGXN Mirror Checker", time: "daily", job: "{{ app.deploy_dir }}/bin/mgr_mirrors" }
-    - name: Restart PGXN Manager
+        name: Run PGXN Mirror Checker
+        special_time: daily
+        job: "{{ app.deploy_dir }}/bin/mgr_mirrors"
+    - name: Create Service Directory
+      file:
+        path: "{{ app.home_dir }}/.config/systemd/user"
+        state: directory
+        mode: "0755"
+    - name: Deploy Service Files
+      loop: [manager, consumer]
+      template:
+        src: "{{ item }}.service"
+        dest: "{{ app.home_dir }}/.config/systemd/user/{{ item }}.pgxn.org.service"
+        mode: "0644"
+    - name: Enable Linger for {{ ansible_user }}
+      changed_when: false
       command:
-        cmd: "{{ app.deploy_dir }}/bin/mgr_ctl restart"
+        argv: [loginctl, enable-linger, "{{ ansible_user }}"]
+    - name: Restart Manager
+      loop: [manager, consumer]
+      ansible.builtin.systemd_service:
+        name: "{{ item }}.pgxn.org"
+        scope: user
+        enabled: true
+        state: restarted
+        daemon_reload: true

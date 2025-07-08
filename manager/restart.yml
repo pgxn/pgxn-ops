@@ -3,8 +3,11 @@
   hosts: manager
   tags: [service]
   tasks:
-    - name: Include Variables
-      include_vars: file=vars.yml name=app
-    - name: Restart PGXN Manager
-      command:
-        cmd: "{{ app.deploy_dir }}/bin/mgr_ctl restart"
+    - name: Restart Manager
+      loop: [manager, consumer]
+      ansible.builtin.systemd_service:
+        name: "{{ item }}.pgxn.org"
+        scope: user
+        enabled: true
+        state: restarted
+        daemon_reload: true

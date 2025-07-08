@@ -3,7 +3,10 @@
   hosts: api
   tags: [service]
   tasks:
-    - name: Include Variables
-      include_vars: file=vars.yml name=app
-    - command:
-        cmd: "{{ app.deploy_dir }}/bin/api_ctl restart"
+    - name: Restart API Service
+      ansible.builtin.systemd_service:
+        name: api.pgxn.org
+        scope: user
+        enabled: true
+        state: restarted
+        daemon_reload: true
