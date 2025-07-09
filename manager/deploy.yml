@@ -14,7 +14,7 @@
         owner: pgxn
         group: pgxn
         mode: "u=rwx,g=rx,o="
-      loop: [mgr_ctl, mgr_mirrors]
+      loop: [mgr_mirrors]
     - name: Configure {{ [app.dist_name, app.version] | join('-') }}
       ansible.builtin.template:
         # Password stored in 1Password as “PGXN Manager Secrets”

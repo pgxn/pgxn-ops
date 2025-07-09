@@ -17,8 +17,6 @@
           mode: "u=rwx,g=rx,o=rx"
         - dir: "{{ app.release_dir }}/logs"
           mode: "u=rwx,g=rwx,o="
-        - dir: "{{ app.release_dir }}/pids"
-          mode: "u=rwx,g=rwx,o="
         - dir: "{{ app.work_dir }}"
           mode: "u=rwx,g=rx,o=rx"
     - name: Download and Unpack
@@ -79,4 +77,3 @@
         force: true
       loop:
         - { src: "logs", dst: logs }
-        - { src: "pids", dst: pids }

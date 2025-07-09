@@ -7,13 +7,6 @@
       ansible.builtin.include_vars:
         file: vars.yml
         name: app
-    - name: Install Control Script
-      ansible.builtin.template:
-        src: "site_ctl.j2"
-        dest: "{{ app.release_dir }}/{{ app.name }}-{{ app.version }}/bin/site_ctl"
-        owner: pgxn
-        group: pgxn
-        mode: "u=rwx,g=rx,o="
     - name: Deploy {{ [app.name, app.version] | join('-') }}
       ansible.builtin.file:
         state: link

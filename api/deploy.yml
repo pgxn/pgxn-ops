@@ -14,7 +14,7 @@
         owner: pgxn
         group: pgxn
         mode: "u=rwx,g=rx,o="
-      loop: [api_ctl, api_sync]
+      loop: [api_sync]
     - name: Setup Cron Environment
       ansible.builtin.cron:
         env: true

@@ -17,8 +17,6 @@
           mode: "u=rwx,go=rx"
         - dir: "{{ app.release_dir }}/logs"
           mode: "u=rwx,g=rwx,o="
-        - dir: "{{ app.release_dir }}/pids"
-          mode: "u=rwx,g=rwx,o="
         - dir: "{{ app.release_dir }}/api-root"
           mode: "u=rwx,go=rx"
     - name: Build {{ [app.name, app.version] | join('-') }}
@@ -40,5 +38,4 @@
         force: true
       loop:
         - { src: "logs", dst: logs }
-        - { src: "pids", dst: pids }
         - { src: "api-root", dst: www }
