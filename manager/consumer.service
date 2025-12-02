@@ -13,7 +13,7 @@ WorkingDirectory={{ app.deploy_dir }}
 ExecSearchPath={{ app.deploy_dir }}/bin
 Environment=PERL5LIB=lib/perl5
 Environment="TMPDIR=$HOME/tmp"
-Environment=PGPORT=5433
+Environment=PGPORT=5435
 ExecStart=pgxn_consumer \
     -E prod \
     --interval {{ app.opt.interval }} \
