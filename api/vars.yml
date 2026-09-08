@@ -1,10 +1,11 @@
 ---
 name: pgxn-api
-version: v0.21.1
+version: v0.22.0
 module: PGXN::API
 release_dir: /home/pgxn/pgxn
 deploy_dir: /var/virtuals/pgxn/api.pgxn.org
 mirror_dir: /var/virtuals/pgxn/master.pgxn.org
+base_url: https://api.pgxn.org
 home_dir: /home/pgxn_api
 
 opt:
